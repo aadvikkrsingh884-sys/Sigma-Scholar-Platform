@@ -1,0 +1,859 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Sigma Scholar API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: syllabus
+    description: Syllabus management
+  - name: notes
+    description: Notes management
+  - name: tests
+    description: Tests management
+  - name: users
+    description: User management
+  - name: progress
+    description: Progress tracking
+  - name: chat
+    description: AI chat history
+  - name: stats
+    description: Dashboard statistics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /syllabus/classes:
+    get:
+      operationId: listClasses
+      tags: [syllabus]
+      summary: List all classes
+      responses:
+        "200":
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClassItem"
+
+  /syllabus/classes/{classId}/subjects:
+    get:
+      operationId: listSubjects
+      tags: [syllabus]
+      summary: List subjects for a class
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+
+  /syllabus/subjects/{subjectId}/chapters:
+    get:
+      operationId: listChapters
+      tags: [syllabus]
+      summary: List chapters for a subject
+      parameters:
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of chapters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chapter"
+
+  /syllabus/chapters/{chapterId}/topics:
+    get:
+      operationId: listTopics
+      tags: [syllabus]
+      summary: List topics for a chapter
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Topic"
+
+  /notes:
+    get:
+      operationId: listNotes
+      tags: [notes]
+      summary: List notes (optionally filtered)
+      parameters:
+        - name: classId
+          in: query
+          schema:
+            type: string
+        - name: subjectId
+          in: query
+          schema:
+            type: string
+        - name: chapterId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+    post:
+      operationId: createNote
+      tags: [notes]
+      summary: Create a new note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteInput"
+      responses:
+        "201":
+          description: Created note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+
+  /notes/{noteId}:
+    get:
+      operationId: getNote
+      tags: [notes]
+      summary: Get a note by ID
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Note details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+    patch:
+      operationId: updateNote
+      tags: [notes]
+      summary: Update a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoteUpdate"
+      responses:
+        "200":
+          description: Updated note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+    delete:
+      operationId: deleteNote
+      tags: [notes]
+      summary: Delete a note
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /tests:
+    get:
+      operationId: listTests
+      tags: [tests]
+      summary: List tests
+      parameters:
+        - name: classId
+          in: query
+          schema:
+            type: string
+        - name: subjectId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Test"
+    post:
+      operationId: createTest
+      tags: [tests]
+      summary: Create a test
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestInput"
+      responses:
+        "201":
+          description: Created test
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+
+  /tests/{testId}:
+    get:
+      operationId: getTest
+      tags: [tests]
+      summary: Get a test by ID
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Test details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+    patch:
+      operationId: updateTest
+      tags: [tests]
+      summary: Update a test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestUpdate"
+      responses:
+        "200":
+          description: Updated test
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+    delete:
+      operationId: deleteTest
+      tags: [tests]
+      summary: Delete a test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /tests/{testId}/submit:
+    post:
+      operationId: submitTestResult
+      tags: [tests]
+      summary: Submit test result
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestResultInput"
+      responses:
+        "201":
+          description: Saved result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestResult"
+
+  /results:
+    get:
+      operationId: listResults
+      tags: [tests]
+      summary: List test results for a user
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TestResult"
+
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (admin)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+
+  /progress/{userId}:
+    get:
+      operationId: getUserProgress
+      tags: [progress]
+      summary: Get user progress
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User progress
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressEntry"
+
+  /progress:
+    post:
+      operationId: saveProgress
+      tags: [progress]
+      summary: Save progress entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressInput"
+      responses:
+        "201":
+          description: Saved progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressEntry"
+
+  /bookmarks/{userId}:
+    get:
+      operationId: getUserBookmarks
+      tags: [users]
+      summary: Get user bookmarks
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User bookmarks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bookmark"
+
+  /bookmarks:
+    post:
+      operationId: addBookmark
+      tags: [users]
+      summary: Add a bookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookmarkInput"
+      responses:
+        "201":
+          description: Added bookmark
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+
+  /bookmarks/{bookmarkId}:
+    delete:
+      operationId: removeBookmark
+      tags: [users]
+      summary: Remove a bookmark
+      parameters:
+        - name: bookmarkId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Removed
+
+  /chat/{userId}:
+    get:
+      operationId: getChatHistory
+      tags: [chat]
+      summary: Get AI chat history for user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+
+  /chat:
+    post:
+      operationId: saveChatMessage
+      tags: [chat]
+      summary: Save a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "201":
+          description: Saved message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/user/{userId}:
+    get:
+      operationId: getUserStats
+      tags: [stats]
+      summary: Get stats for a specific user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ClassItem:
+      type: object
+      required: [id, name, order]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        order: { type: integer }
+        totalSubjects: { type: ["integer", "null"] }
+        totalChapters: { type: ["integer", "null"] }
+
+    Subject:
+      type: object
+      required: [id, classId, name, color, icon]
+      properties:
+        id: { type: string }
+        classId: { type: string }
+        name: { type: string }
+        color: { type: string }
+        icon: { type: string }
+        order: { type: integer }
+        totalChapters: { type: ["integer", "null"] }
+
+    Chapter:
+      type: object
+      required: [id, subjectId, classId, name, order]
+      properties:
+        id: { type: string }
+        subjectId: { type: string }
+        classId: { type: string }
+        name: { type: string }
+        order: { type: integer }
+        description: { type: ["string", "null"] }
+        totalTopics: { type: ["integer", "null"] }
+        hasNotes: { type: ["boolean", "null"] }
+        hasPDF: { type: ["boolean", "null"] }
+
+    Topic:
+      type: object
+      required: [id, chapterId, name, order]
+      properties:
+        id: { type: string }
+        chapterId: { type: string }
+        name: { type: string }
+        order: { type: integer }
+        description: { type: ["string", "null"] }
+
+    Note:
+      type: object
+      required: [id, classId, subjectId, chapterId, title, type, createdAt]
+      properties:
+        id: { type: string }
+        classId: { type: string }
+        subjectId: { type: string }
+        chapterId: { type: string }
+        title: { type: string }
+        content: { type: ["string", "null"] }
+        pdfUrl: { type: ["string", "null"] }
+        type: { type: string, enum: [pdf, text, video] }
+        createdAt: { type: string }
+        updatedAt: { type: ["string", "null"] }
+
+    NoteInput:
+      type: object
+      required: [classId, subjectId, chapterId, title, type]
+      properties:
+        classId: { type: string }
+        subjectId: { type: string }
+        chapterId: { type: string }
+        title: { type: string }
+        content: { type: string }
+        pdfUrl: { type: string }
+        type: { type: string, enum: [pdf, text, video] }
+
+    NoteUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        content: { type: string }
+        pdfUrl: { type: string }
+        type: { type: string, enum: [pdf, text, video] }
+
+    Test:
+      type: object
+      required: [id, classId, subjectId, title, type, duration, totalMarks, createdAt]
+      properties:
+        id: { type: string }
+        classId: { type: string }
+        subjectId: { type: string }
+        chapterId: { type: ["string", "null"] }
+        title: { type: string }
+        type: { type: string, enum: [chapter, subject, mock, exam] }
+        duration: { type: integer }
+        totalMarks: { type: integer }
+        totalQuestions: { type: integer }
+        createdAt: { type: string }
+
+    TestInput:
+      type: object
+      required: [classId, subjectId, title, type, duration, totalMarks]
+      properties:
+        classId: { type: string }
+        subjectId: { type: string }
+        chapterId: { type: string }
+        title: { type: string }
+        type: { type: string, enum: [chapter, subject, mock, exam] }
+        duration: { type: integer }
+        totalMarks: { type: integer }
+        questions: { type: string }
+
+    TestUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        duration: { type: integer }
+        totalMarks: { type: integer }
+        questions: { type: string }
+
+    TestResultInput:
+      type: object
+      required: [userId, score, totalMarks, timeTaken]
+      properties:
+        userId: { type: string }
+        score: { type: integer }
+        totalMarks: { type: integer }
+        timeTaken: { type: integer }
+        answers: { type: string }
+
+    TestResult:
+      type: object
+      required: [id, testId, userId, score, totalMarks, percentage, createdAt]
+      properties:
+        id: { type: string }
+        testId: { type: string }
+        userId: { type: string }
+        score: { type: integer }
+        totalMarks: { type: integer }
+        percentage: { type: number }
+        timeTaken: { type: integer }
+        createdAt: { type: string }
+
+    UserProfile:
+      type: object
+      required: [id, email, displayName, createdAt]
+      properties:
+        id: { type: string }
+        email: { type: string }
+        displayName: { type: string }
+        photoURL: { type: ["string", "null"] }
+        classId: { type: ["string", "null"] }
+        className: { type: ["string", "null"] }
+        createdAt: { type: string }
+        lastActive: { type: ["string", "null"] }
+        isAdmin: { type: ["boolean", "null"] }
+
+    UserUpdate:
+      type: object
+      properties:
+        displayName: { type: string }
+        classId: { type: string }
+        photoURL: { type: string }
+
+    ProgressEntry:
+      type: object
+      required: [id, userId, chapterId, subjectId, classId, completed, updatedAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        chapterId: { type: string }
+        subjectId: { type: string }
+        classId: { type: string }
+        completed: { type: boolean }
+        percentage: { type: ["number", "null"] }
+        updatedAt: { type: string }
+
+    ProgressInput:
+      type: object
+      required: [userId, chapterId, subjectId, classId, completed]
+      properties:
+        userId: { type: string }
+        chapterId: { type: string }
+        subjectId: { type: string }
+        classId: { type: string }
+        completed: { type: boolean }
+        percentage: { type: number }
+
+    Bookmark:
+      type: object
+      required: [id, userId, type, refId, title, createdAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        type: { type: string, enum: [chapter, note, test] }
+        refId: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        createdAt: { type: string }
+
+    BookmarkInput:
+      type: object
+      required: [userId, type, refId, title]
+      properties:
+        userId: { type: string }
+        type: { type: string, enum: [chapter, note, test] }
+        refId: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+
+    ChatMessage:
+      type: object
+      required: [id, userId, role, content, createdAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        role: { type: string, enum: [user, assistant] }
+        content: { type: string }
+        createdAt: { type: string }
+
+    ChatMessageInput:
+      type: object
+      required: [userId, role, content]
+      properties:
+        userId: { type: string }
+        role: { type: string, enum: [user, assistant] }
+        content: { type: string }
+
+    DashboardStats:
+      type: object
+      required: [totalStudents, totalNotes, totalTests, totalChapters, recentActivity]
+      properties:
+        totalStudents: { type: integer }
+        totalNotes: { type: integer }
+        totalTests: { type: integer }
+        totalChapters: { type: integer }
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+
+    UserStats:
+      type: object
+      required: [userId, completedChapters, totalChapters, testsAttempted, averageScore, studyStreak]
+      properties:
+        userId: { type: string }
+        completedChapters: { type: integer }
+        totalChapters: { type: integer }
+        testsAttempted: { type: integer }
+        averageScore: { type: number }
+        studyStreak: { type: integer }
+        recentResults:
+          type: array
+          items:
+            $ref: "#/components/schemas/TestResult"
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        description: { type: string }
+        userId: { type: ["string", "null"] }
+        userName: { type: ["string", "null"] }
+        createdAt: { type: string }

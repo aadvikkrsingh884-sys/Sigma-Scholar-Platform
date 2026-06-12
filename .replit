@@ -1,0 +1,46 @@
+modules = ["nodejs-24", "python-3.11", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyBcu_UDQtH6pOWUAexOYPpvGzyLhGN1tkI"
+VITE_FIREBASE_AUTH_DOMAIN = "aadvik-study-master.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID = "aadvik-study-master"
+VITE_FIREBASE_STORAGE_BUCKET = "aadvik-study-master.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "889050630157"
+VITE_FIREBASE_APP_ID = "1:889050630157:web:8d873ddd5e88961ad4ad44"
+VITE_FIREBASE_MEASUREMENT_ID = "G-KGBZWGGJZH"
+
+[nix]
+channel = "stable-25_05"
